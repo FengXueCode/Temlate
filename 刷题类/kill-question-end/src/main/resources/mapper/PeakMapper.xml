@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.zfizwy.killquestionend.mapper.PeakMapper">
+
+    <resultMap id="BaseResultMap" type="cn.zfizwy.killquestionend.entity.Peak">
+            <id property="peakId" column="peak_id" jdbcType="VARCHAR"/>
+            <result property="questionBankId" column="question_bank_id" jdbcType="VARCHAR"/>
+            <result property="userId" column="user_id" jdbcType="VARCHAR"/>
+            <result property="time" column="time" jdbcType="INTEGER"/>
+            <result property="correct" column="correct" jdbcType="INTEGER"/>
+            <result property="total" column="total" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        peak_id,question_bank_id,user_id,
+        time,correct,total
+    </sql>
+</mapper>

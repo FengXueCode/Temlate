@@ -1,0 +1,56 @@
+@import url('@/static/font/myFont.css');
+
+html,
+body {
+  width      : 100vw;
+  height     : 100vh;
+  padding    : 0;
+  margin     : 0;
+  box-sizing : border-box;
+  font-family: myFont;
+  position   : relative;
+}
+
+.init {
+  padding   : 10px;
+  width     : 100%;
+  height    : 100%;
+  box-sizing: border-box;
+  position  : relative;
+
+  //功能栏
+  .function-nav {
+    margin-bottom: 10px;
+    height       : 36px;
+  }
+
+  //主要内容
+  .init-main {
+    width     : 100%;
+    height    : calc(100% - 88px - 36px);
+    box-sizing: border-box;
+  }
+
+  // 分页
+  .pagination {
+    width          : 100%;
+    height         : 36px;
+    display        : flex;
+    justify-content: center;
+    position       : absolute;
+    bottom         : 10px;
+  }
+
+  .title {
+    font-size: 18px;
+  }
+
+  .tip {
+    margin-top: 8px;
+    font-size : 14px;
+    color     : grey;
+  }
+
+
+
+}
