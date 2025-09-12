@@ -1,0 +1,5 @@
+server:
+  port: 8088
+  max-http-request-header-size: 102400
+
+
