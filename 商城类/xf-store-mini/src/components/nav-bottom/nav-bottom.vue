@@ -27,7 +27,7 @@ const list = ref([
     label: "首页"
   },
   {
-    path: "/pages/index",
+    path: "/pageClass/class",
     icon: "",
     iconActive: "",
     label: "分类"

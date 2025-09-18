@@ -1,9 +1,9 @@
 <template>
   <div class="main">
-    <up-navbar v-if="isScrolled" :background="{ background: { color: '#FF231F' } }">
+    <up-navbar v-if="isScrolled" :background="{ background: { color: '$uni-color-zt' } }">
       <template #left>
         <div class="search">
-          <up-search :showAction="false"></up-search>
+          <up-search :showAction="false" placeholder="搜索商品"></up-search>
         </div>
       </template>
 
@@ -96,7 +96,7 @@ list.value = [
 </script>
 <style scoped lang="scss">
 :deep(.u-navbar) {
-  background: #FF231F !important;
+  background: $uni-color-zt !important;
 }
 
 .main {
@@ -107,7 +107,7 @@ list.value = [
 
   .bg-head {
     height: 20vh;
-    background: #FF231F;
+    background: $uni-color-zt;
     position: relative;
     border-radius: 0 0 20px 20px;
 
@@ -194,7 +194,7 @@ list.value = [
       flex-wrap: nowrap;
 
       &.active {
-        background-color: #FF231F;
+        background-color: $uni-color-zt;
         color: white;
 
       }
@@ -241,7 +241,7 @@ list.value = [
 
         .price {
           margin-top: 10px;
-          color: #FF231F;
+          color: $uni-color-zt;
         }
       }
     }

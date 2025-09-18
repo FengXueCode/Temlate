@@ -5,8 +5,8 @@
       <img src="../static/icon/my/user.svg" alt="" class="head-img">
       <div class="name">{{ user1.userName ===undefined?"未登录":user1.userName }}</div>
     </div>
+    
     <up-cell-group>
-
       <up-cell v-for="(item,index) in navList" :key="index" :title="item.label" :icon="item.icon" isLink @click="navTo(item.url)" >
       </up-cell>
     </up-cell-group>
