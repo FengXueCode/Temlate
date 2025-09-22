@@ -175,6 +175,7 @@ list.value = [
     // 当isRowListFixed为true时固定在顶部
     background-color: white;
     z-index: 999;
+
     &.fixed {
       position: sticky;
       top: 88px;

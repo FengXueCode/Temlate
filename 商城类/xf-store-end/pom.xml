@@ -43,12 +43,19 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
         </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
 
+        <dependency>
+            <groupId>cn.zfizwy</groupId>
+            <artifactId>common-service</artifactId>
+            <version>1.0.0</version>
+            <scope>compile</scope>
+        </dependency>
 
     </dependencies>
 
@@ -84,5 +91,6 @@
     <module>common-service</module>
     <module>wechat-service</module>
     <module>user-service</module>
+    <module>product-service</module>
 </modules>
 </project>

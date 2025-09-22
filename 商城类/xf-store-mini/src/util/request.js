@@ -13,24 +13,22 @@ function request(url, data = {}, method = "POST", header = {}) {
       url: import.meta.env.VITE_BASE_URL + url,
       data: data,
       header: {
-        token:uni.getStorageSync("user").token,
+        token: uni.getStorageSync("user").token,
         ...header
       },
       method: method,
     }).then(res => {
-      console.log('响应结果',res)
-      if (Number(res.data.rtnCode) === 0) {
-        if (res.data == undefined) {
+      if (res.statusCode === 200) {
+        if (res.data.data == undefined) {
           resolve(res.data)
           return
         }
-        resolve(res.data.data);
+        resolve(res.data);
       } else {
         reject(res.data)
       }
     }).catch(err => {
-      console.log('响应失败结果',err)
-
+      console.log('响应失败结果', err)
       uni.showToast({
         title: '请求失败',
         icon: 'error',

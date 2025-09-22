@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: product-service # 服务名称
+  cloud:
+    nacos:
+      server-addr: 127.0.0.1 # nacos地址
+#      server-addr: 172.18.0.2 # nacos地址
+
+#      username: nacos
+#      password: FengXue@
+      config:
+        file-extension: yaml # 文件后缀名
+        shared-configs: # 共享配置
+          - dataId: shared-jdbc.yaml # 共享mybatis配置
+#          - dataId: shared-jdbc-test.yaml # 共享mybatis配置
+          - dataId: shared-log.yaml # 共享日志配置
+          - dataId: shared-swagger.yaml # 共享日志配置

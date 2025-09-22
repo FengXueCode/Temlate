@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.zfizwy.productservice.mapper.ProductMapper">
+
+    <resultMap id="BaseResultMap" type="cn.zfizwy.productservice.entity.Product">
+            <id property="productId" column="product_id" jdbcType="VARCHAR"/>
+            <result property="name" column="name" jdbcType="VARCHAR"/>
+            <result property="mainImage" column="main_image" jdbcType="VARCHAR"/>
+            <result property="description" column="description" jdbcType="VARCHAR"/>
+            <result property="price" column="price" jdbcType="DECIMAL"/>
+            <result property="stock" column="stock" jdbcType="INTEGER"/>
+            <result property="status" column="status" jdbcType="INTEGER"/>
+            <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+            <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
+            <result property="classId" column="class_id" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        product_id,name,main_image,
+        description,price,stock,
+        status,create_time,update_time,
+        class_id
+    </sql>
+</mapper>

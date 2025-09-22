@@ -11,31 +11,31 @@
         <div class="container">
             <div class="left">
                 <div class="item">推荐</div>
-                <div class="item" :class="{ active: checkMainClass.classId === item.classId }" v-for="item in classList"
-                    :key="item.classId" @click="handleClassCheck(item)">{{
-                        item.name
+                <div class="item" :class="{ active: checkMainClass.productClass.classId === item.productClass.classId }"
+                    v-for="item in classList" :key="item.productClass.classId" @click="handleClassCheck(item)">{{
+                        item.productClass.name
                     }}
                 </div>
             </div>
             <div class="right">
                 <div class="banner"></div>
                 <div class="right-top-list">
-                    <div class="item" :class="{ active: item.classId === checkChildClass.classId }"
-                        v-for="item in checkMainClass.children" :key="item.classId">{{ item.name }}</div>
+                    <div class="item" :class="{ active: item.productClass.classId === checkChildClass.productClass.classId }"
+                        v-for="item in checkMainClass?.children" :key="item.productClass.classId">{{
+                            item.productClass.name }}
+                    </div>
                 </div>
                 <div class="class-list">
-                    <div class="class" v-for="item in checkMainClass.children">
-                        <div class="title">{{ item.name }}</div>
+                    <div class="class" v-for="item in checkMainClass?.children">
+                        <div class="title">{{ item.productClass.name }}</div>
 
-                        <!-- 子分类 -->
-                        <div class="children-list" v-if="item.children != undefined">
+                        <div class="children-list" v-if="item.children.length != 0">
                             <div class="item" v-for="itm in item.children" :key="item.classId">
-                                <img :src="itm.image" alt="" class="item-img">
-                                <div class="label">{{ itm.name }}</div>
+                                <img :src="itm.productClass.image" alt="" class="item-img">
+                                <div class="label">{{ itm.productClass.name }}</div>
                             </div>
                         </div>
 
-                        <!-- 商品列表 -->
                         <div class="product-list" v-else>
                             <div class="item" v-for="itm in productList" :key="item.productId">
                                 <img :src="itm.mainImage" alt="" class="item-img">
@@ -51,7 +51,6 @@
             </div>
         </div>
 
-
         <nav-bottom :checkNav="1"></nav-bottom>
     </div>
 </template>
@@ -60,52 +59,25 @@ onLoad((val: any) => {
 
 });
 onMounted(() => {
+    getClassList()
 })
 
-const classList = ref([
-    {
-        classId: "1", name: "xiaomi", parent: "", image: "", children: [
-            { classId: "1-1", name: "XiaoMi 数字旗舰", image: "", parent: "1" },
-            { classId: "1-2", name: "XiaoMi MIX系列", image: "", parent: "1" },
-            { classId: "1-3", name: "XiaoMi Civi", image: "", parnet: "1" },
-            { classId: "1-4", name: "XiaoMi 手机套餐", image: "", parent: "1" },
-        ],
-
-    },
-    {
-        classId: "2", name: "手机配件", parent: "", image: "", children: [
-            {
-                classId: "2-1", name: "XiaoMi 配件", image: "", parent: "2", children: [
-                    { classId: "2-1-1", name: "充电器", image: "", parent: "2-1" },
-                    { classId: "2-1-2", name: "车充", image: "", parent: "2-1" },
-                    { classId: "2-1-3", name: "游戏配件", image: "", parent: "2-1" },
-                    { classId: "2-1-4", name: "数据线", image: "", parent: "2-1" },
-                    { classId: "2-1-5", name: "无线充", image: "", parent: "2-1" },
-                    { classId: "2-1-6", name: "手机保护壳", image: "", parent: "2-1" },
-                    { classId: "2-1-7", name: "手机贴膜", image: "", parent: "2-1" },
-                    { classId: "2-1-8", name: "充电宝", image: "", parent: "2-1" },
-                    { classId: "2-1-9", name: "自拍杆", image: "", parent: "2-1" },
-                    { classId: "2-1-10", name: "自拍杆", image: "", parent: "2-1" },
-                ]
-            },
-            {
-                classId: "2-2", name: "Redmi 配件", image: "", parent: "2", children: [
-                    { classId: "2-2-1", name: "充电器", image: "", parent: "2-2" },
-                ]
-            },
-        ]
-    },
-
-])
+const classList = ref([])
+function getClassList() {
+    classApi.queryAll().then(res => {
+        console.log("🚀 ~ getClassList ~ res:", res)
+        classList.value = res
+        checkMainClass.value = res[0]
+        checkChildClass.value = checkMainClass.value.children[0]
+    })
+}
 const checkMainClass = ref()
-checkMainClass.value = classList.value[0]
 //切换分类
 function handleClassCheck(item: any) {
     checkMainClass.value = item
     checkChildClass.value = item.children[0]
 }
 const checkChildClass = ref()
-checkChildClass.value = checkMainClass.value.children[0]
 
 //商品列表
 const productList = ref([
@@ -229,6 +201,7 @@ const productList = ref([
                             border: 1px solid;
                             margin-right: 10px;
                         }
+
                         .item-info {
                             display: flex;
                             flex-direction: column;

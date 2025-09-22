@@ -8,6 +8,7 @@ declare global {
   const EffectScope: typeof import('vue')['EffectScope']
   const administrativeRegion: typeof import('./src/util/administrativeRegion.js')['default']
   const back: typeof import('./src/util/util.js')['back']
+  const classApi: typeof import('./src/api/classApi.js')['default']
   const computed: typeof import('vue')['computed']
   const config: typeof import('./src/util/config.js')['default']
   const createApp: typeof import('vue')['createApp']
