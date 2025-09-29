@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.zfizwy.xfmahjongend.mapper.RoomRecordMapper">
+
+    <resultMap id="BaseResultMap" type="cn.zfizwy.xfmahjongend.entity.RoomRecord">
+            <id property="roomRecordId" column="room_record_id" jdbcType="VARCHAR"/>
+            <result property="roomId" column="room_id" jdbcType="VARCHAR"/>
+            <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+            <result property="winner" column="winner" jdbcType="VARCHAR"/>
+            <result property="loser" column="loser" jdbcType="VARCHAR"/>
+            <result property="money" column="money" jdbcType="DECIMAL"/>
+            <result property="tea" column="tea" jdbcType="DECIMAL"/>
+            <result property="recordType" column="record_type" jdbcType="INTEGER"/>
+            <result property="settlement" column="settlement" jdbcType="VARCHAR"/>
+            <result property="settlementLocation" column="settlement_location" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        room_record_id,room_id,create_time,
+        winner,loser,money,
+        tea,record_type,settlement,
+        settlement_location
+    </sql>
+</mapper>
