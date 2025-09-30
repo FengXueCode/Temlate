@@ -1,6 +1,6 @@
 <template>
     <div class='main'>
-        <up-navbar title="麻友记账" leftIcon="">
+        <up-navbar :title="`麻友记账(${room?.roomRatio}元局)`" leftIcon="">
 
         </up-navbar>
         <!-- 用户列表  -->
@@ -12,10 +12,10 @@
                         <div class="icon">
                             雀
                         </div>
-                        <div class="orientation east">东</div>
-                        <div class="orientation south">南</div>
-                        <div class="orientation west">西</div>
-                        <div class="orientation north">北</div>
+                        <div class="orientation east" :class="{isMe:currentRoomUser?.location == 0}">东</div>
+                        <div class="orientation south" :class="{isMe:currentRoomUser?.location == 1}">南</div>
+                        <div class="orientation west" :class="{isMe:currentRoomUser?.location == 2}">西</div>
+                        <div class="orientation north" :class="{isMe:currentRoomUser?.location == 3}">北</div>
                     </div>
                     <div class="item" :class="'location' + item.location" v-for="item in userList" :key="item.userId"
                         @click="selectUserForTransfer(item)"
@@ -51,7 +51,8 @@
             <div class="item-group">
                 <div class="item" v-for="item in userList" :key="item.userId" @click="selectUserForTransfer(item)"
                     @longpress="room.roomType === 0 ? showSwitchSeatMenuModal(item) : showEditRemarkModal(item)">
-                    <img :src="(item.portrait == null || item.portrait == '') ? head : item.portrait" alt="" class="head">
+                    <img :src="(item.portrait == null || item.portrait == '') ? head : item.portrait" alt=""
+                        class="head">
                     <div class="info">
                         <div class="name">{{ item.nickname }}</div>
                         <div class="money" :class="{ minus: item.money < 0 }">{{ item.money }} 分</div>
@@ -76,10 +77,10 @@
                 <div class="join" v-if="item.type === 0">{{ item.message }}</div>
                 <div class="record" v-else>
                     <img v-if="item.recordType === 1"
-                        :src="item.settlementPortrait == null ? head : item.settlementPortrait" alt="" class="head">
+                        :src="getUserPortrait(item.settlement) == null ? head : getUserPortrait(item.settlement)" alt="" class="head">
 
                     <img v-if="item.loser !== currentUser.userId && item.recordType === 0"
-                        :src="item.loserPortrait == null ? head : item.loserPortrait" alt="" class="head">
+                        :src="getUserPortrait(item.loser) == null ? head : getUserPortrait(item.loser)" alt="" class="head">
 
                     <div class="info" :class="{ me: item.loser === currentUser.userId && item.recordType === 0 }">
                         <div class="time">{{ formaDate(item.createTime) }}</div>
@@ -87,7 +88,7 @@
 
                             <span class="red">{{
                                 getUserNickname(item.loser)
-                                }}</span>
+                            }}</span>
                             向
                             <span class="red">{{ getUserNickname(item.winner) }}</span>
                             转账
@@ -113,7 +114,7 @@
                     </div>
 
                     <img v-if="item.loser === currentUser.userId && item.recordType === 0"
-                        :src="item.loserPortrait == null ? head : item.loserPortrait" alt="" class="head">
+                        :src="getUserPortrait(item.loser) == null ? head : getUserPortrait(item.loser)" alt="" class="head">
                 </div>
 
             </div>
@@ -370,16 +371,23 @@ function checkFriend() {
 //--------------------<获取用户数据>-----------------------
 const userList = ref([])
 const fullUserList = ref([])
+const currentRoomUser = ref()
 function getRoomUser() {
     roomApi.getRoomUser(roomId.value).then((res) => {
         fullUserList.value = res;
+        currentRoomUser.value = res.find(item => item.userId == currentUser.userId)
         userList.value = res.filter(item => item.status === 1)
     })
 }
 function getUserNickname(userId: string) {
     let user = fullUserList.value.find(item => item.userId == userId)
-    if (user == undefined) return ''
+    if (user == undefined) return null
     return user.nickname
+}
+function getUserPortrait(userId: string) {
+    let user = fullUserList.value.find(item => item.userId == userId)
+    if (user == undefined) return null
+    return user.portrait;
 }
 //--------------------<操作记录>-----------------------
 const history = ref([])
@@ -954,6 +962,10 @@ function confirmSeatChange() {
                     &.north {
                         top: 6px;
                     }
+                    &.isMe {
+                        color: white;
+                        background: $uni-color-zt;
+                    }
 
                 }
 
@@ -1026,7 +1038,7 @@ function confirmSeatChange() {
             }
 
             .money {
-                color: red;
+                color: $uni-color-error;
 
                 &.minus {
                     color: $uni-color-warning;

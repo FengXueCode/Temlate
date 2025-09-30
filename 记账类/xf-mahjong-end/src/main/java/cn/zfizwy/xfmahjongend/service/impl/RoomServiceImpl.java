@@ -3,16 +3,16 @@ package cn.zfizwy.xfmahjongend.service.impl;
 import cn.zfizwy.xfmahjongend.common.Constant;
 import cn.zfizwy.xfmahjongend.common.R;
 import cn.zfizwy.xfmahjongend.entity.*;
+import cn.zfizwy.xfmahjongend.entity.vo.SettlementVO;
 import cn.zfizwy.xfmahjongend.mapper.FriendMapper;
 import cn.zfizwy.xfmahjongend.mapper.RoomRecordMapper;
 import cn.zfizwy.xfmahjongend.mapper.RoomUserMapper;
-import cn.zfizwy.xfmahjongend.service.UserService;
+import cn.zfizwy.xfmahjongend.service.*;
 import cn.zfizwy.xfmahjongend.utils.UserContext;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import cn.zfizwy.xfmahjongend.service.RoomService;
 import cn.zfizwy.xfmahjongend.mapper.RoomMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,6 +20,8 @@ import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author ChengLexiang
@@ -41,12 +43,20 @@ public class RoomServiceImpl extends ServiceImpl<RoomMapper, Room>
     @Autowired
     UserService userService;
 
+    @Autowired
+    RoomUserService roomUserService;
+    @Autowired
+    RoomRecordService roomRecordService;
+    @Autowired
+    RoomEndingService roomEndingService;
+
+
     @Override
-    public R createRoom( int mode,BigDecimal  ratio) {
+    public R createRoom(int mode, BigDecimal ratio) {
         Room room = new Room();
         room.setCreator(UserContext.get());
         room.setRoomType(mode);
-        room.setRoomRatio( ratio);
+        room.setRoomRatio(ratio);
         int insert = roomMapper.insert(room);
         return new R<>(200, insert > 0 ? "创建成功" : "创建失败", insert > 0 ? room : null);
     }
@@ -73,13 +83,13 @@ public class RoomServiceImpl extends ServiceImpl<RoomMapper, Room>
         List<RoomUser> roomUsers = roomUserMapper.selectList(queryWrapper);
         // 判断是否有好友备注
         for (RoomUser roomUser : roomUsers) {
-            if(roomUser.getUserId().equals(UserContext.get())){
+            if (roomUser.getUserId().equals(UserContext.get())) {
                 continue;
             }
             LambdaQueryWrapper<Friend> queryWrapper1 = new LambdaQueryWrapper<>();
             queryWrapper1.eq(Friend::getUserId, UserContext.get()).eq(Friend::getToUserId, roomUser.getUserId());
             Friend one = friendMapper.selectOne(queryWrapper1);
-            if (one != null&&one.getRemark() != null) {
+            if (one != null && one.getRemark() != null) {
                 roomUser.setNickname(one.getRemark());
             }
         }
@@ -148,7 +158,7 @@ public class RoomServiceImpl extends ServiceImpl<RoomMapper, Room>
         List<RoomUser> roomUsers = roomUserMapper.selectList(queryWrapper);
         //判断其它用户是否为好友
         for (RoomUser roomUser : roomUsers) {
-            if(roomUser.getUserId().equals(UserContext.get())){
+            if (roomUser.getUserId().equals(UserContext.get())) {
                 continue;
             }
             LambdaQueryWrapper<Friend> queryWrapper1 = new LambdaQueryWrapper<>();
@@ -166,10 +176,9 @@ public class RoomServiceImpl extends ServiceImpl<RoomMapper, Room>
     }
 
 
-
     @Override
     public R updateTea(Room room) {
-        return roomMapper.updateById(room)>0?new R<>(200,"修改成功",null):new R<>(-1,"修改失败",null);
+        return roomMapper.updateById(room) > 0 ? new R<>(200, "修改成功", null) : new R<>(-1, "修改失败", null);
     }
 
     @Override
@@ -202,13 +211,168 @@ public class RoomServiceImpl extends ServiceImpl<RoomMapper, Room>
 
     @Override
     public List<RoomRecord> getSettlement(String roomId) {
-        LambdaQueryWrapper<RoomRecord> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(RoomRecord::getRoomId, roomId)
+        // 先查询出满足条件的最新创建时间
+        LambdaQueryWrapper<RoomRecord> maxTimeQuery = new LambdaQueryWrapper<>();
+        maxTimeQuery.eq(RoomRecord::getRoomId, roomId)
                 .eq(RoomRecord::getRecordType, 1)
-                .eq(RoomRecord::getSettlement,UserContext.get());
+                .and(wrapper -> wrapper
+                        .eq(RoomRecord::getLoser, UserContext.get())
+                        .or()
+                        .eq(RoomRecord::getWinner, UserContext.get())
+                );
+        maxTimeQuery.orderByDesc(RoomRecord::getCreateTime);
+        maxTimeQuery.last("LIMIT 1");
 
-        return roomRecordMapper.selectList(queryWrapper);
+        RoomRecord latestRecord = roomRecordMapper.selectOne(maxTimeQuery);
+
+        if (latestRecord == null) {
+            return List.of(); // 如果没有找到记录，返回空列表
+        }
+
+        // 再查询创建时间等于最新时间的所有记录
+        LambdaQueryWrapper<RoomRecord> settlementRecordQuery = new LambdaQueryWrapper<>();
+        settlementRecordQuery.eq(RoomRecord::getRoomId, roomId)
+                .eq(RoomRecord::getRecordType, 1)
+                .eq(RoomRecord::getCreateTime, latestRecord.getCreateTime())
+                .and(wrapper -> wrapper
+                        .eq(RoomRecord::getLoser, UserContext.get())
+                        .or()
+                        .eq(RoomRecord::getWinner, UserContext.get())
+                );
+
+        return roomRecordMapper.selectList(settlementRecordQuery);
     }
+
+    @Override
+    public void settlement(String roomId, String userId, Boolean flag) {
+        //获取当前用户
+        LambdaQueryWrapper<RoomUser> queryUserWrapper = new LambdaQueryWrapper<>();
+        queryUserWrapper.eq(RoomUser::getRoomId, roomId).eq(RoomUser::getUserId, userId);
+        RoomUser user = roomUserService.getOne(queryUserWrapper);
+
+        // 获取房间所有用户
+        LambdaQueryWrapper<RoomUser> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(RoomUser::getRoomId, roomId);
+        queryWrapper.eq(RoomUser::getStatus, 1);
+        List<RoomUser> roomUsers = roomUserMapper.selectList(queryWrapper);
+        for(RoomUser roomUser : roomUsers){
+           if(roomUser.getUserId().equals(userId)){
+               continue;
+           }
+            //获取俩人之间是否有结算记录
+            LambdaQueryWrapper<RoomRecord> settlementRecordQuery = new LambdaQueryWrapper<>();
+            settlementRecordQuery.eq(RoomRecord::getRoomId, roomId)
+                    .eq(RoomRecord::getRecordType, 1)
+                    .and(wrapper -> wrapper.eq(RoomRecord::getWinner, roomUser.getUserId())
+                            .eq(RoomRecord::getLoser, userId)
+                            .or()
+                            .eq(RoomRecord::getWinner, userId)
+                            .eq(RoomRecord::getLoser, roomUser.getUserId())
+                    );
+            RoomRecord one = roomRecordMapper.selectOne(settlementRecordQuery);
+            //获取俩人之间的交易记录，如果存在结算记录，则只获取结算后的新记录
+            LambdaQueryWrapper<RoomRecord> queryWrapper2 = new LambdaQueryWrapper<>();
+            queryWrapper2.eq(RoomRecord::getRoomId, roomId)
+                    .eq(RoomRecord::getRecordType, 0)
+                    .and(wrapper -> wrapper.eq(RoomRecord::getWinner, roomUser.getUserId())
+                            .eq(RoomRecord::getLoser, userId)
+                            .or()
+                            .eq(RoomRecord::getWinner, userId)
+                            .eq(RoomRecord::getLoser, roomUser.getUserId())
+                    );
+            if (one != null) {
+                queryWrapper2.ge(RoomRecord::getCreateTime, one.getCreateTime());
+            }
+            List<RoomRecord> records = roomRecordMapper.selectList(queryWrapper2);
+            //计算交易结余(累加winner为userId金额减去loser为userId金额)
+            BigDecimal balance = records.stream().map(record -> {
+                if (record.getWinner().equals(userId)) {
+                    return record.getMoney();
+                } else {
+                    return record.getMoney().negate();
+                }
+            }).reduce(BigDecimal.ZERO, BigDecimal::add);
+
+            //添加结算记录
+            RoomRecord roomRecord = new RoomRecord();
+            roomRecord.setRoomId(roomId);
+            roomRecord.setRecordType(1);
+            roomRecord.setSettlement(user.getUserId());
+            //判断结余是否大于0
+            if (balance.compareTo(BigDecimal.ZERO) > 0) {
+                roomRecord.setWinner(userId);
+                roomRecord.setLoser(roomUser.getUserId());
+            } else {
+                roomRecord.setWinner(roomUser.getUserId());
+                roomRecord.setLoser(userId);
+            }
+            roomRecord.setMoney(balance);
+            roomRecord.setTea(user.getTea());
+
+            roomRecordService.save(roomRecord);
+            //更新用户金额
+            if(flag){
+                roomUser.setMoney(roomUser.getMoney().add(balance));
+                user.setStatus(0);
+                roomUserService.update(roomUser, new LambdaQueryWrapper<RoomUser>().eq(RoomUser::getRoomId, roomId).eq(RoomUser::getUserId, roomUser.getUserId()));
+                roomUserService.update(user, new LambdaQueryWrapper<RoomUser>().eq(RoomUser::getRoomId, roomId).eq(RoomUser::getUserId, userId));
+
+            }
+
+        }
+        // 记录场次胜负
+        RoomEnding roomEnding = new RoomEnding();
+        roomEnding.setRoomId(roomId);
+        roomEnding.setUserId(userId);
+        roomEnding.setLocation(user.getLocation());
+        roomEnding.setMoney(user.getMoney());
+        roomEndingService.save(roomEnding);
+
+    }
+
+    @Override
+    public void roomSettlement(String roomId) {
+
+        LambdaQueryWrapper<RoomUser> userQueryWrapper = new LambdaQueryWrapper<>();
+        userQueryWrapper.eq(RoomUser::getRoomId, roomId).eq(RoomUser::getStatus, 1);
+
+        // 1.获取所有在线用户
+        List<RoomUser> roomUsers = roomUserService.list(userQueryWrapper);
+        // 2. 遍历用户 与 其它用户结算
+        for (RoomUser roomUser : roomUsers) {
+            settlement(roomId, roomUser.getUserId(), false);
+            // 3. 修改用户状态
+            LambdaUpdateWrapper<RoomUser> roomUserUpdateWrapper = new LambdaUpdateWrapper<>();
+            roomUserUpdateWrapper
+                    .eq(RoomUser::getRoomId, roomId)
+                    .eq(RoomUser::getUserId, roomUser.getUserId())
+                    .set(RoomUser::getStatus, 0)
+            ;
+
+            roomUserService.update(roomUserUpdateWrapper);
+        }
+        // 4. 修改房间状态
+        LambdaUpdateWrapper<Room> roomUpdateWrapper = new LambdaUpdateWrapper<>();
+        roomUpdateWrapper.eq(Room::getRoomId, roomId).set(Room::getStatus, 0);
+        roomMapper.update(roomUpdateWrapper);
+
+
+    }
+
+@Override
+public List<RoomEnding> getRoomEnding(String roomId) {
+    // 使用子查询获取每个用户的最新记录
+    LambdaQueryWrapper<RoomEnding> queryWrapper = new LambdaQueryWrapper<>();
+    queryWrapper.eq(RoomEnding::getRoomId, roomId);
+
+    // 子查询：获取每个userId的最大(createTime)
+    queryWrapper.apply("EXISTS (SELECT 1 FROM room_ending re2 WHERE re2.user_id = room_ending.user_id AND re2.room_id = {0} GROUP BY re2.user_id HAVING MAX(re2.create_time) = room_ending.create_time)", roomId);
+
+    queryWrapper.orderByDesc(RoomEnding::getMoney);
+
+    return roomEndingService.list(queryWrapper);
+}
+
 
 
 }

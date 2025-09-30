@@ -2,8 +2,10 @@ package cn.zfizwy.xfmahjongend.controller;
 
 import cn.zfizwy.xfmahjongend.common.R;
 import cn.zfizwy.xfmahjongend.entity.Room;
+import cn.zfizwy.xfmahjongend.entity.RoomEnding;
 import cn.zfizwy.xfmahjongend.entity.RoomRecord;
 import cn.zfizwy.xfmahjongend.entity.RoomUser;
+import cn.zfizwy.xfmahjongend.entity.vo.SettlementVO;
 import cn.zfizwy.xfmahjongend.service.RoomService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -20,8 +22,8 @@ public class RoomController {
     RoomService roomService;
 
     @GetMapping("/create")
-    public R createRoom(@RequestParam("mode") int mode, @RequestParam("ratio") BigDecimal  ratio) {
-        return roomService.createRoom(  mode,  ratio);
+    public R createRoom(@RequestParam("mode") int mode, @RequestParam("ratio") BigDecimal ratio) {
+        return roomService.createRoom(mode, ratio);
     }
 
     @GetMapping("/getRoom")
@@ -63,7 +65,7 @@ public class RoomController {
 
     //修改好友备注
     @GetMapping("/updateRemark")
-    public R updateRemark( @RequestParam("to") String to, @RequestParam("remark") String remark) {
+    public R updateRemark(@RequestParam("to") String to, @RequestParam("remark") String remark) {
         return roomService.updateRemark(to, remark);
     }
 
@@ -72,15 +74,38 @@ public class RoomController {
     public List<RoomRecord> getRoomRecord(@RequestParam("roomId") String roomId) {
         return roomService.getRoomRecord(roomId);
     }
+
     //获取房间茶水
     @GetMapping("/getTea")
-    public R getTea(@RequestParam("roomId") String roomId){
+    public R getTea(@RequestParam("roomId") String roomId) {
         return roomService.getTea(roomId);
     }
 
-    //获取结算信息
+    //获取个人结算信息
     @GetMapping("/getSettlement")
-public List<RoomRecord> getSettlement(@RequestParam("roomId") String roomId){
+    public List<RoomRecord> getSettlement(@RequestParam("roomId") String roomId) {
         return roomService.getSettlement(roomId);
     }
+
+
+
+    //获取房间结算信息
+    @GetMapping("/getRoomEnding")
+    public List<RoomEnding> getRoomEnd(@RequestParam("roomId") String roomId) {
+        return  roomService.getRoomEnding(roomId);
+    }
+
+
+    //个人结算
+    @GetMapping("/settlement")
+    public void settlement(@RequestParam("roomId") String roomId,@RequestParam("userId") String userId,@RequestParam("flag") Boolean flag) {
+        roomService.settlement(roomId,userId,flag);
+    }
+
+    //房间结算
+    @GetMapping("/roomSettlement")
+    public void roomSettlement(@RequestParam("roomId") String roomId) {
+        roomService.roomSettlement(roomId);
+    }
+
 }

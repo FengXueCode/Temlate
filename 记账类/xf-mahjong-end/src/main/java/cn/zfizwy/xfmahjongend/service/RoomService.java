@@ -2,8 +2,10 @@ package cn.zfizwy.xfmahjongend.service;
 
 import cn.zfizwy.xfmahjongend.common.R;
 import cn.zfizwy.xfmahjongend.entity.Room;
+import cn.zfizwy.xfmahjongend.entity.RoomEnding;
 import cn.zfizwy.xfmahjongend.entity.RoomRecord;
 import cn.zfizwy.xfmahjongend.entity.RoomUser;
+import cn.zfizwy.xfmahjongend.entity.vo.SettlementVO;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.math.BigDecimal;
@@ -38,4 +40,12 @@ public interface RoomService extends IService<Room> {
     R getTea(String roomId);
 
     List<RoomRecord> getSettlement(String roomId);
+
+    void settlement(String roomId, String userId, Boolean flag);
+
+    void roomSettlement(String roomId);
+
+    List<RoomEnding> getRoomEnding(String roomId);
+
+
 }

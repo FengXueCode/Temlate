@@ -61,11 +61,6 @@ public class RoomRecord {
      */
     private String settlement;
 
-    /**
-     * 0 东 1 南 2 西 3 北
-     */
-    private Integer settlementLocation;
-
     @Override
     public boolean equals(Object that) {
         if (this == that) {
@@ -86,8 +81,7 @@ public class RoomRecord {
             && (this.getMoney() == null ? other.getMoney() == null : this.getMoney().equals(other.getMoney()))
             && (this.getTea() == null ? other.getTea() == null : this.getTea().equals(other.getTea()))
             && (this.getRecordType() == null ? other.getRecordType() == null : this.getRecordType().equals(other.getRecordType()))
-            && (this.getSettlement() == null ? other.getSettlement() == null : this.getSettlement().equals(other.getSettlement()))
-            && (this.getSettlementLocation() == null ? other.getSettlementLocation() == null : this.getSettlementLocation().equals(other.getSettlementLocation()));
+            && (this.getSettlement() == null ? other.getSettlement() == null : this.getSettlement().equals(other.getSettlement()));
     }
 
     @Override
@@ -103,7 +97,6 @@ public class RoomRecord {
         result = prime * result + ((getTea() == null) ? 0 : getTea().hashCode());
         result = prime * result + ((getRecordType() == null) ? 0 : getRecordType().hashCode());
         result = prime * result + ((getSettlement() == null) ? 0 : getSettlement().hashCode());
-        result = prime * result + ((getSettlementLocation() == null) ? 0 : getSettlementLocation().hashCode());
         return result;
     }
 
@@ -122,7 +115,6 @@ public class RoomRecord {
         sb.append(", tea=").append(tea);
         sb.append(", recordType=").append(recordType);
         sb.append(", settlement=").append(settlement);
-        sb.append(", settlementLocation=").append(settlementLocation);
         sb.append("]");
         return sb.toString();
     }

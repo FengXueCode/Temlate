@@ -18,6 +18,8 @@ public class UserInfoInterceptor implements HandlerInterceptor {
     public UserInfoInterceptor() {
         // 默认放行的路径
         excludePaths.add("/images/**");
+        excludePaths.add("/room/settlement");
+        excludePaths.add("/room/roomSettlement");
         excludePaths.add("/websocket/**");
         excludePaths.add("/user/init");
     }

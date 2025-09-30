@@ -1,6 +1,6 @@
 //--------------------<创建房间>-----------------------
-function createRoom(mode,ratio) {
-    return request("/room/create", {mode:mode,ratio:ratio}, 'GET', {})
+function createRoom(mode, ratio) {
+    return request("/room/create", { mode: mode, ratio: ratio }, 'GET', {})
 }
 //--------------------<获取房间>-----------------------
 function getRoom() {
@@ -41,12 +41,17 @@ function getHistory(roomId) {
 }
 //--------------------<获取房间茶水>-----------------------
 function getRoomTea(roomId) {
-    return request("/room/getTea",{roomId:roomId},'GET',{})
+    return request("/room/getTea", { roomId: roomId }, 'GET', {})
 }
 //--------------------<获取结算信息>-----------------------
 function getSettlement(roomId) {
     return request("/room/getSettlement", { roomId: roomId }, 'GET', {})
 }
+//--------------------<获取房间结算信息>-----------------------
+function getRoomEnding(roomId) {
+    return request("/room/getRoomEnding", { roomId: roomId }, 'GET', {})
+}
+
 export default {
     createRoom,
     getRoom,
@@ -59,5 +64,6 @@ export default {
     updateFriendRemark,
     getHistory,
     getRoomTea,
-    getSettlement
+    getSettlement,
+    getRoomEnding
 }

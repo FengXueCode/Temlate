@@ -14,13 +14,11 @@
             <result property="tea" column="tea" jdbcType="DECIMAL"/>
             <result property="recordType" column="record_type" jdbcType="INTEGER"/>
             <result property="settlement" column="settlement" jdbcType="VARCHAR"/>
-            <result property="settlementLocation" column="settlement_location" jdbcType="INTEGER"/>
     </resultMap>
 
     <sql id="Base_Column_List">
         room_record_id,room_id,create_time,
         winner,loser,money,
-        tea,record_type,settlement,
-        settlement_location
+        tea,record_type,settlement
     </sql>
 </mapper>
